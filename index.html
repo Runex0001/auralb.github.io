@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AuraLB | ELITE SOFTWARE</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Rajdhani', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        bg: '#030304',
+                        panel: '#0a0a0f',
+                        neonBlue: '#00f3ff',
+                        neonPurple: '#bc13fe',
+                        neonRed: '#ff2a6d',
+                        neonGreen: '#05ffa1',
+                        gold: '#ffd700',
+                    },
+                    animation: {
+                        'spin-slow': 'spin 12s linear infinite',
+                        'pulse-fast': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glitch': 'glitch 1s linear infinite',
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #1f1f1f 1px, transparent 1px), linear-gradient(to bottom, #1f1f1f 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- CORE STYLES --- */
+        body {
+            background-color: #030304;
+            color: #e2e8f0;
+            cursor: none;
+            overflow-x: hidden;
+        }
+
+        /* --- GRID BACKGROUND --- */
+        .bg-grid {
+            background-size: 40px 40px;
+            mask-image: linear-gradient(to bottom, transparent, 10%, black, 90%, transparent);
+        }
+
+        /* --- CUSTOM SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030304; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+        /* --- CURSOR --- */
+        #cursor-dot {
+            width: 6px; height: 6px; background: #00f3ff;
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
+            box-shadow: 0 0 10px #00f3ff;
+        }
+        #cursor-ring {
+            width: 30px; height: 30px; border: 1px solid rgba(0, 243, 255, 0.4);
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999;
+            transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
+            transform: translate(-50%, -50%);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            background: rgba(5, 5, 8, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .sidebar.active { transform: translateX(0); }
+
+        /* --- MODULE CARDS --- */
+        .tech-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .tech-card:hover {
+            border-color: rgba(0, 243, 255, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0, 243, 255, 0.15);
+        }
+        .tech-card:hover .icon-glow {
+            color: #00f3ff;
+            filter: drop-shadow(0 0 8px rgba(0, 243, 255, 0.5));
+        }
+
+        /* --- GLITCH TEXT EFFECT --- */
+        .glitch-wrapper { position: relative; display: inline-block; }
+        .glitch-wrapper::before, .glitch-wrapper::after {
+            content: attr(data-text);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8;
+        }
+        .glitch-wrapper::before {
+            color: #ff00ff; z-index: -1; transform: translate(-2px, 0); clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+            animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+        }
+        .glitch-wrapper::after {
+            color: #00ffff; z-index: -2; transform: translate(2px, 0); clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); } 20% { clip-path: inset(60% 0 1% 0); }
+            40% { clip-path: inset(40% 0 50% 0); } 60% { clip-path: inset(80% 0 5% 0); }
+            80% { clip-path: inset(10% 0 60% 0); } 100% { clip-path: inset(30% 0 30% 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(10% 0 60% 0); } 20% { clip-path: inset(30% 0 20% 0); }
+            40% { clip-path: inset(70% 0 10% 0); } 60% { clip-path: inset(20% 0 50% 0); }
+            80% { clip-path: inset(60% 0 30% 0); } 100% { clip-path: inset(10% 0 80% 0); }
+        }
+
+        /* --- SCANLINE --- */
+        .scanline {
+            position: fixed; left: 0; top: 0; width: 100%; height: 2px;
+            background: rgba(0, 243, 255, 0.3);
+            animation: scan 4s linear infinite;
+            opacity: 0.5; pointer-events: none; z-index: 50;
+        }
+        @keyframes scan { 0% {top: -10%;} 100% {top: 110%;} }
+        
+        /* --- TAB SYSTEM --- */
+        .tab-btn.active {
+            background-color: rgba(0, 243, 255, 0.1);
+            border-color: #00f3ff;
+            color: #00f3ff;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-neonBlue selection:text-black">
+
+    <div id="cursor-dot" class="hidden md:block"></div>
+    <div id="cursor-ring" class="hidden md:block"></div>
+    <div class="scanline"></div>
+    <div class="fixed inset-0 bg-grid-pattern bg-grid z-[-1] opacity-20"></div>
+
+    <nav class="fixed w-full z-40 top-0 h-20 border-b border-white/5 bg-black/80 backdrop-blur-md flex items-center justify-between px-6 md:px-10">
+        <div class="flex items-center gap-6">
+            <button onclick="toggleSidebar()" class="group p-2 hover:bg-white/10 rounded transition-colors">
+                <i data-lucide="menu" class="w-6 h-6 text-white group-hover:text-neonBlue"></i>
+            </button>
+            <div class="flex flex-col">
+                <span class="text-2xl font-bold font-sans tracking-widest leading-none">AuraLB</span>
+                <span class="text-[10px] text-neonBlue font-mono tracking-wider">SYSTEMS_ACTIVE</span>
+            </div>
+        </div>
+        
+        <div class="hidden md:flex gap-8 text-xs font-mono text-gray-400">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span>STATUS: UNDETECTED</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-3 h-3"></i>
+                <span>VER: 3.0.0</span>
+            </div>
+        </div>
+
+        <button class="hidden sm:block border border-neonBlue/50 text-neonBlue px-6 py-2 text-xs font-bold hover:bg-neonBlue hover:text-black transition-all font-mono uppercase tracking-widest">
+            Inject
+        </button>
+    </nav>
+
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/80 z-40 hidden opacity-0 transition-opacity backdrop-blur-sm"></div>
+    <aside id="main-sidebar" class="sidebar fixed top-0 left-0 h-full w-[320px] z-50 flex flex-col pt-24 pb-8">
+        <div class="px-8 mb-10">
+            <h3 class="text-xs font-mono text-gray-500 mb-4 border-b border-gray-800 pb-2">MAIN MENU</h3>
+            <nav class="space-y-2 font-sans font-bold text-lg tracking-wide">
+                <a href="#home" onclick="toggleSidebar()" class="block py-3 px-4 hover:bg-white/5 hover:text-neonBlue hover:pl-6 transition-all border-l-2 border-transparent hover:border-neonBlue">HOME</a>
+                <a href="#stats" onclick="toggleSidebar()" class="block py-3 px-4 hover:bg-white/5 hover:text-neonBlue hover:pl-6 transition-all border-l-2 border-transparent hover:border-neonBlue">LIVE STATS</a>
+                <a href="#modules" onclick="toggleSidebar()" class="block py-3 px-4 hover:bg-white/5 hover:text-neonBlue hover:pl-6 transition-all border-l-2 border-transparent hover:border-neonBlue">MODULES DB</a>
+                <a href="#comparison" onclick="toggleSidebar()" class="block py-3 px-4 hover:bg-white/5 hover:text-neonBlue hover:pl-6 transition-all border-l-2 border-transparent hover:border-neonBlue">COMPARISON</a>
+                <a href="#changelog" onclick="toggleSidebar()" class="block py-3 px-4 hover:bg-white/5 hover:text-neonBlue hover:pl-6 transition-all border-l-2 border-transparent hover:border-neonBlue">CHANGELOG</a>
+                <a href="#faq" onclick="toggleSidebar()" class="block py-3 px-4 hover:bg-white/5 hover:text-neonBlue hover:pl-6 transition-all border-l-2 border-transparent hover:border-neonBlue">F.A.Q.</a>
+            </nav>
+        </div>
+
+        <div class="mt-auto px-8">
+            <div class="bg-gradient-to-r from-neonBlue/10 to-transparent border border-neonBlue/20 p-4 rounded mb-4">
+                <h4 class="text-neonBlue font-bold text-sm mb-1">PREMIUM ACCESS</h4>
+                <p class="text-xs text-gray-400 mb-3">Unlock config sharing & cloud scripts.</p>
+                <div class="w-full bg-gray-800 h-1 rounded overflow-hidden">
+                    <div class="bg-neonBlue h-full w-[70%]"></div>
+                </div>
+            </div>
+            <div class="flex gap-4 text-gray-500">
+                <i data-lucide="settings" class="w-5 h-5 hover:text-white cursor-pointer"></i>
+                <i data-lucide="log-out" class="w-5 h-5 hover:text-white cursor-pointer"></i>
+            </div>
+        </div>
+    </aside>
+
+    <section id="home" class="relative pt-40 pb-24 px-6 min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neonPurple/10 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div class="text-center z-10 max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 border border-neonBlue/30 bg-neonBlue/5 px-3 py-1 rounded-full mb-6">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-neonBlue opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-neonBlue"></span>
+                </span>
+                <span class="text-xs font-mono text-neonBlue tracking-widest">NOW UPDATED FOR 1.20+</span>
+            </div>
+
+            <h1 class="text-6xl md:text-8xl font-bold font-sans mb-6 leading-tight">
+                DOMINATE THE <br>
+                <span class="glitch-wrapper text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-500" data-text="SIMULATION">SIMULATION</span>
+            </h1>
+            
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 font-mono">
+                The most advanced utility client for Minecraft Bedrock Edition. 
+                Featuring <span class="text-white">packet-level manipulation</span>, <span class="text-white">AI-driven auto-mining</span>, and <span class="text-white">undetectable injects</span>.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-white text-black px-8 py-4 font-bold rounded hover:scale-105 transition-transform flex items-center justify-center gap-2">
+                    <i data-lucide="download"></i> DOWNLOAD AURALB
+                </button>
+                <button class="border border-white/20 bg-white/5 px-8 py-4 font-bold rounded hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="play-circle"></i> WATCH SHOWCASE
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="stats" class="py-12 border-y border-white/5 bg-black/50">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="p-4">
+                <div class="text-4xl font-bold text-neonBlue font-mono mb-1 count-up" data-target="R">Released</div>
+                <div class="text-xs text-gray-500 tracking-widest uppercase">Status</div>
+            </div>
+            <div class="p-4 border-l border-white/5">
+                <div class="text-4xl font-bold text-neonPurple font-mono mb-1 count-up" data-target="LB">0</div>
+                <div class="text-xs text-gray-500 tracking-widest uppercase">Servers Bypassed!</div>
+            </div>
+            <div class="p-4 border-l border-white/5">
+                <div class="text-4xl font-bold text-neonGreen font-mono mb-1 count-up" data-target="100+">0</div>
+                <div class="text-xs text-gray-500 tracking-widest uppercase">Modules Available</div>
+            </div>
+            <div class="p-4 border-l border-white/5">
+                <div class="text-4xl font-bold text-white font-mono mb-1">0%</div>
+                <div class="text-xs text-gray-500 tracking-widest uppercase">Detection Rate</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="modules" class="py-24 bg-panel relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div>
+                    <h2 class="text-4xl font-bold font-sans mb-2">MODULE <span class="text-neonBlue">DATABASE</span></h2>
+                    <p class="text-gray-400 font-mono text-sm">Explore AuraLB's extensive library of features.</p>
+                </div>
+                
+                <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
+                    <button class="tab-btn active px-4 py-2 rounded border border-white/10 text-sm font-bold hover:bg-white/5 transition-colors" onclick="filterModules('all', this)">ALL</button>
+                    <button class="tab-btn px-4 py-2 rounded border border-white/10 text-sm font-bold hover:bg-white/5 transition-colors" onclick="filterModules('combat', this)">COMBAT</button>
+                    <button class="tab-btn px-4 py-2 rounded border border-white/10 text-sm font-bold hover:bg-white/5 transition-colors" onclick="filterModules('movement', this)">MOVEMENT</button>
+                    <button class="tab-btn px-4 py-2 rounded border border-white/10 text-sm font-bold hover:bg-white/5 transition-colors" onclick="filterModules('render', this)">RENDER</button>
+                    <button class="tab-btn px-4 py-2 rounded border border-white/10 text-sm font-bold hover:bg-white/5 transition-colors" onclick="filterModules('world', this)">WORLD</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="modules-grid">
+                
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="combat">
+                    <i data-lucide="crosshair" class="w-8 h-8 text-neonRed mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">KillAura X</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Advanced entity attacking with customizable rotations and smart targeting.</p>
+                </div>
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="combat">
+                    <i data-lucide="target" class="w-8 h-8 text-neonRed mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">SilentAim</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Redirects projectiles to targets without looking at them directly.</p>
+                </div>
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="combat">
+                    <i data-lucide="shield" class="w-8 h-8 text-neonRed mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">AutoCrystal</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">High-speed crystal placement and breaking for anarchy servers.</p>
+                </div>
+
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="movement">
+                    <i data-lucide="wind" class="w-8 h-8 text-neonBlue mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Jetpack</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Fly through the air with customizable speed and vertical drag.</p>
+                </div>
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="movement">
+                    <i data-lucide="chevrons-up" class="w-8 h-8 text-neonBlue mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Spider</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Climb walls like a spider. Includes Matrix and Vulcan bypasses.</p>
+                </div>
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="movement">
+                    <i data-lucide="zap" class="w-8 h-8 text-neonBlue mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Speed V2</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">The fastest bunny-hop on the market. Works on Hive and Cubecraft.</p>
+                </div>
+                 <div class="tech-card p-6 rounded-xl group module-item" data-category="movement">
+                    <i data-lucide="anchor" class="w-8 h-8 text-neonBlue mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Velocity</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Eliminate knockback from attacks entirely or reduce it by percentage.</p>
+                </div>
+
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="render">
+                    <i data-lucide="eye" class="w-8 h-8 text-neonPurple mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Chams</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Render players through walls with customizable colors and shaders.</p>
+                </div>
+                 <div class="tech-card p-6 rounded-xl group module-item" data-category="render">
+                    <i data-lucide="maximize" class="w-8 h-8 text-neonPurple mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">X-Ray</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Locate ores and valuable blocks instantly through the terrain.</p>
+                </div>
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="render">
+                    <i data-lucide="bar-chart-2" class="w-8 h-8 text-neonPurple mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Trajectories</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Visualize where your arrows and pearls will land before throwing.</p>
+                </div>
+
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="world">
+                    <i data-lucide="hammer" class="w-8 h-8 text-neonGreen mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Scaffold Walk</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Place blocks beneath you automatically. Supports sprinting and rotation.</p>
+                </div>
+                <div class="tech-card p-6 rounded-xl group module-item" data-category="world">
+                    <i data-lucide="box" class="w-8 h-8 text-neonGreen mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Nuker</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Obliterate surroundings. Modes for beds, eggs, and cakes included.</p>
+                </div>
+                 <div class="tech-card p-6 rounded-xl group module-item" data-category="world">
+                    <i data-lucide="clock" class="w-8 h-8 text-neonGreen mb-4 icon-glow transition-all"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Stealer</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Empty chests in a fraction of a second. Fully configurable delay.</p>
+                </div>
+
+            </div>
+            
+            <div class="mt-10 text-center">
+                <button class="text-gray-500 text-sm hover:text-white transition-colors underline decoration-dotted">View All 156 Modules</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="comparison" class="py-24 px-6 border-y border-white/5">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold font-sans mb-4 text-center">WHY CHOOSE <span class="text-neonBlue">AURALB?</span></h2>
+            <p class="text-gray-400 text-center mb-10 font-mono text-sm">See how we stack up against the competition.</p>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 bg-white/5">
+                            <th class="p-4 text-gray-300 font-bold font-sans">FEATURE</th>
+                            <th class="p-4 text-neonBlue font-bold font-sans border-b-2 border-neonBlue">AuraLB (Elite)</th>
+                            <th class="p-4 text-gray-400 font-bold font-sans">External Injectors<br><span class="text-[10px] opacity-50 font-mono">(Like BoustV4)</span></th>
+                            <th class="p-4 text-gray-500 font-bold font-sans">Proxy<br><span class="text-[10px] opacity-50 font-mono">(Like Sabar/Matro)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="font-mono text-sm">
+                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-gray-300 font-bold">Injection Technology</td>
+                            <td class="p-4 text-green-400">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="cpu" class="w-4 h-4"></i> Internal C++ Hook
+                                </div>
+                            </td>
+                            <td class="p-4 text-yellow-400">External Overlay</td>
+                            <td class="p-4 text-red-400">Standard Proxy</td>
+                        </tr>
+                        
+                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-gray-300 font-bold">Performance Impact</td>
+                            <td class="p-4 text-green-400">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="zap" class="w-4 h-4"></i> Optimized (0 FPS drop)
+                                </div>
+                            </td>
+                            <td class="p-4 text-red-400">Slightly Lag (-20 FPS)</td>
+                            <td class="p-4 text-yellow-400">Proxy Network Drop</td>
+                        </tr>
+
+                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-gray-300 font-bold">Anti-Cheat Bypasses</td>
+                            <td class="p-4 text-green-400">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="shield-check" class="w-4 h-4"></i> Lifeboat
+                                </div>
+                            </td>
+                            <td class="p-4 text-yellow-400">Limited</td>
+                            <td class="p-4 text-red-400">Often Detected</td>
+                        </tr>
+
+                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-gray-300 font-bold">Features</td>
+                            <td class="p-4 text-green-400">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="cloud" class="w-4 h-4"></i> +ModsList/Automine+ updated
+                                </div>
+                            </td>
+                            <td class="p-4 text-red-400">OLD</td>
+                            <td class="p-4 text-red-400">OLD</td>
+                        </tr>
+
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-gray-300 font-bold">Modules</td>
+                            <td class="p-4 text-green-400">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="code" class="w-4 h-4"></i> 100+
+                                </div>
+                            </td>
+                            <td class="p-4 text-red-400">~50</td>
+                            <td class="p-4 text-yellow-400">Limited Commands</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center font-mono text-xs">
+                 <div class="p-4 border border-green-500/20 bg-green-500/5 rounded">
+                    <span class="text-green-400 font-bold block mb-1">AuraLB</span>
+                    <span class="text-gray-400">Best for professional bypassing & competitive play.</span>
+                 </div>
+                 <div class="p-4 border border-yellow-500/20 bg-yellow-500/5 rounded">
+                    <span class="text-yellow-400 font-bold block mb-1">External Injectors</span>
+                    <span class="text-gray-400">Bad for visuals, but also bad for movement/combat.</span>
+                 </div>
+                 <div class="p-4 border border-red-500/20 bg-red-500/5 rounded">
+                    <span class="text-red-400 font-bold block mb-1">Proxy</span>
+                    <span class="text-gray-400">Often crash or get you banned.</span>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="changelog" class="py-24 bg-black relative">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-3xl font-bold font-sans mb-12">UPDATE <span class="text-neonPurple">LOGS</span></h2>
+            
+            <div class="border-l-2 border-white/10 ml-4 space-y-12">
+                <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-neonBlue rounded-full shadow-[0_0_10px_#00f3ff]"></div>
+                    <span class="text-neonBlue font-mono text-xs mb-1 block">CURRENT VERSION</span>
+                    <h3 class="text-2xl font-bold text-white">v3.0.0 - The "Public" Update</h3>
+                    <p class="text-gray-500 text-sm mb-4">Released Yesterday</p>
+                    <ul class="list-disc list-inside text-gray-400 text-sm space-y-1">
+                        <li>Introduced <span class="text-white">AuraLB</span> for PCs.</li>
+                        <li>New "HvH Mode".</li>
+                         <li>New "Custom Injector".</li>
+                        <li>Added Hive Auto-Game (Hide and seek).</li>
+                        <li>Significant performance boost for low-end PCs.</li>
+                    </ul>
+                </div>
+
+                <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-700 rounded-full"></div>
+                    <h3 class="text-xl font-bold text-gray-300">v2.5.0 - Private</h3>
+                    <p class="text-gray-500 text-sm mb-4">Released November 2025</p>
+                    <ul class="list-disc list-inside text-gray-500 text-sm space-y-1">
+                        <li>Completely rewrote KillAura logic for better reach.</li>
+                        <li>Added CriticalLB mode.</li>
+                        <li>Added InventoryMove (Walk while open inventory).</li>
+                    </ul>
+                </div>
+
+                 <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-700 rounded-full"></div>
+                    <h3 class="text-xl font-bold text-gray-300">v2.0.0 - Private</h3>
+                    <p class="text-gray-500 text-sm mb-4">Released August 2025</p>
+                    <p class="text-gray-500 text-sm">Full recode for maximum public performance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="py-24 bg-panel">
+        <div class="max-w-3xl mx-auto px-6">
+            <h2 class="text-3xl font-bold font-sans mb-10 text-center">FREQUENTLY ASKED <span class="text-neonBlue">QUESTIONS</span></h2>
+            
+            <div class="space-y-4">
+                <details class="group bg-white/5 border border-white/5 rounded-lg open:bg-white/10 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-bold text-white">
+                        Is AuraLB safe to use?
+                        <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                        Yes. AuraLB operates entirely client-side and injects directly into memory, leaving no traces in the file system. Our "Eject" feature also clears all strings from memory instantly if needed.
+                    </div>
+                </details>
+
+                <details class="group bg-white/5 border border-white/5 rounded-lg open:bg-white/10 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-bold text-white">
+                        Does it work on Realms and Official Servers?
+                        <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                        Absolutely. Realms and other featured servers are fully supported. We have specific modules designed to bypass server-side anti-cheat measures like Sentinel and Flare.
+                    </div>
+                </details>
+
+                <details class="group bg-white/5 border border-white/5 rounded-lg open:bg-white/10 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-bold text-white">
+                        Is AuraLB free?
+                        <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                        We offer a comprehensive free version with over 80 modules. However, AuraLB Premium unlocks cloud configs, exclusive bypasses, private scripts, and priority support.
+                    </div>
+                </details>
+
+                <details class="group bg-white/5 border border-white/5 rounded-lg open:bg-white/10 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-bold text-white">
+                        How do I install custom scripts?
+                        <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                        Navigate to the "Scripts" tab in the ClickGUI, click "Open Folder", and drag your .lua files in. Type `.reload` in chat to refresh. You can also download community scripts directly from our Cloud tab.
+                    </div>
+                </details>
+
+                <details class="group bg-white/5 border border-white/5 rounded-lg open:bg-white/10 transition-all">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none font-bold text-white">
+                        What operating systems are supported?
+                        <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-6 pb-6 text-gray-400 text-sm leading-relaxed">
+                        AuraLB is currently optimized for Windows 10 and Windows 11 (64-bit). Android and iOS versions are in development and coming later this year.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-[#050505] border-t border-white/10 py-10 font-mono text-xs">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10">
+            <div>
+                <h4 class="text-white font-bold mb-4">SYSTEM LOGS</h4>
+                <div id="terminal-output" class="h-32 overflow-hidden text-gray-500 space-y-1">
+                    </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-8">
+                <div>
+                    <h4 class="text-white font-bold mb-4">LEGAL</h4>
+                    <ul class="space-y-2 text-gray-500">
+                        <li class="hover:text-neonBlue cursor-pointer">Terms of Service</li>
+                        <li class="hover:text-neonBlue cursor-pointer">Privacy Policy</li>
+                        <li class="hover:text-neonBlue cursor-pointer">Disclaimer</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">COMMUNITY</h4>
+                    <ul class="space-y-2 text-gray-500">
+                        <li class="hover:text-neonPurple cursor-pointer">Discord Server</li>
+                        <li class="hover:text-neonPurple cursor-pointer">Telegram Channel</li>
+                        <li class="hover:text-neonPurple cursor-pointer">YouTube Showcase</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-10 text-gray-700">
+            AuraLB &copy; 2025. DESIGNED FOR EDUCATIONAL PURPOSES.
+        </div>
+    </section>
+
+    <script>
+        // --- ICONS ---
+        lucide.createIcons();
+
+        // --- CURSOR LOGIC ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+
+        document.addEventListener('mousemove', (e) => {
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+            
+            setTimeout(() => {
+                cursorRing.style.left = e.clientX + 'px';
+                cursorRing.style.top = e.clientY + 'px';
+            }, 80);
+        });
+
+        // Hover expand
+        const clickables = document.querySelectorAll('button, a, .tech-card, summary');
+        clickables.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorRing.style.width = '50px';
+                cursorRing.style.height = '50px';
+                cursorRing.style.borderColor = '#00f3ff';
+                cursorRing.style.backgroundColor = 'rgba(0, 243, 255, 0.05)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorRing.style.width = '30px';
+                cursorRing.style.height = '30px';
+                cursorRing.style.borderColor = 'rgba(0, 243, 255, 0.4)';
+                cursorRing.style.backgroundColor = 'transparent';
+            });
+        });
+
+        // --- SIDEBAR LOGIC ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // --- MODULE FILTERING ---
+        function filterModules(category, btn) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Filter items
+            const items = document.querySelectorAll('.module-item');
+            items.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                    // subtle animation reset
+                    item.style.opacity = '0';
+                    setTimeout(() => item.style.opacity = '1', 50);
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+// --- FAKE TERMINAL LOGS (SUCCESS ONLY) ---
+const logs = [
+    "[SYSTEM] Boot sequence started",
+    "[SYSTEM] Kernel loaded successfully",
+    "[SYSTEM] Runtime environment prepared",
+    "[SYSTEM] Memory pools initialized",
+
+    "[HARDWARE] CPU detected: 8 cores active",
+    "[HARDWARE] GPU interface online",
+    "[HARDWARE] RAM check complete",
+
+    "[NETWORK] Network stack initialized",
+    "[NETWORK] Resolving endpoint...",
+    "[NETWORK] Connection established",
+    "[NETWORK] Secure tunnel active",
+    "[NETWORK] Latency stable: 6ms",
+    "[NETWORK] Throughput optimal",
+
+    "[AUTH] Authentication request sent",
+    "[AUTH] Credentials accepted",
+    "[AUTH] Session token issued",
+    "[AUTH] Login state confirmed",
+
+    "[FILESYSTEM] Mounting virtual filesystem",
+    "[FILESYSTEM] Read/write access granted",
+    "[FILESYSTEM] Cache directories verified",
+
+    "[MODULES] Core module loaded",
+    "[MODULES] UI module loaded",
+    "[MODULES] Render module loaded",
+    "[MODULES] Input module loaded",
+    "[MODULES] Network module loaded",
+    "[MODULES] All modules initialized",
+
+    "[CACHE] Building runtime cache",
+    "[CACHE] Shader cache ready",
+    "[CACHE] Asset cache synchronized",
+
+    "[SECURITY] Environment validation complete",
+    "[SECURITY] Runtime checks passed",
+    "[SECURITY] Protection layer active",
+
+    "[PROTECT] Definitions loaded",
+    "[PROTECT] Monitoring enabled",
+    "[PROTECT] System state verified",
+
+    "[SYNC] Fetching user configuration",
+    "[SYNC] Profile data loaded",
+    "[SYNC] Settings applied successfully",
+
+    "[RUNTIME] Initializing threads",
+    "[RUNTIME] Worker threads active",
+    "[RUNTIME] Task scheduler online",
+
+    "[GRAPHICS] Renderer initialized",
+    "[GRAPHICS] Frame pipeline ready",
+    "[GRAPHICS] VSync configured",
+
+    "[INPUT] Keyboard handler active",
+    "[INPUT] Mouse handler active",
+    "[INPUT] Input listeners registered",
+
+    "[AUDIO] Audio engine started",
+    "[AUDIO] Output device ready",
+
+    "[SYSTEM] Final checks complete",
+    "[SYSTEM] No conflicts detected",
+    "[SYSTEM] System operating normally",
+
+    "[NETWORK] Heartbeat sent",
+    "[NETWORK] Heartbeat acknowledged",
+    "[NETWORK] Connection healthy",
+
+    "[IDLE] Awaiting user input",
+    "[IDLE] Monitoring activity",
+    "[IDLE] Standing by",
+
+    "[SYSTEM] Status: ONLINE",
+    "[SYSTEM] All systems functional",
+    "[SYSTEM] Ready"
+];
+
+        
+        const terminalOutput = document.getElementById('terminal-output');
+        let logIndex = 0;
+
+        function addLog() {
+            const div = document.createElement('div');
+            div.textContent = `> ${logs[logIndex % logs.length]}`;
+            if(logs[logIndex % logs.length].includes("PASSED") || logs[logIndex % logs.length].includes("Done")) {
+                div.classList.add('text-green-500');
+            }
+            terminalOutput.prepend(div);
+            
+            if (terminalOutput.children.length > 6) {
+                terminalOutput.lastElementChild.remove();
+            }
+            
+            logIndex++;
+            setTimeout(addLog, Math.random() * 2000 + 1000);
+        }
+        addLog();
+
+        // --- NUMBER COUNTER ANIMATION ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = parseInt(entry.target.getAttribute('data-target'));
+                    animateValue(entry.target, 0, target, 2000);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.count-up').forEach(el => observer.observe(el));
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+    </script>
+</body>
+</html>
